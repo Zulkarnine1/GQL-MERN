@@ -4,15 +4,17 @@ const mongoose = require("mongoose");
 
 const GQLSchema = require("./graphql/schema/index");
 const GQLResolvers = require("./graphql/resolvers/index");
+const { authenCheck } = require("./middleware/auth-check");
 
 const app = express();
 
 const EVENTS = [];
 
 app.use(express.json());
-
+app.use(authenCheck);
 app.use(
   "/graphql",
+
   graphqlHTTP({
     schema: GQLSchema,
     rootValue: GQLResolvers,
