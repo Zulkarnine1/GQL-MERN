@@ -2,7 +2,20 @@ const Event = require("../../models/event");
 const User = require("../../models/user");
 const DataLoader = require("dataloader");
 
-const eventLoader = new DataLoader(() => {});
+const Loaders = {
+  setEventLoader: function () {
+    this.eventLoader = new DataLoader((eventIds) => {
+      return getEventsFunc(eventIds);
+    });
+  },
+  setUserLoader: function () {
+    this.userLoader = new DataLoader((userIds) => {
+      return User.find({ _id: { $in: userIds } });
+    });
+  },
+  eventLoader: null,
+  userLoader: null,
+};
 
 const transformEvent = (event) => {
   return {
@@ -38,13 +51,8 @@ const getEventsFunc = async (eventIDs) => {
 
 const getEventFunc = async (eventID) => {
   try {
-    const event = await Event.findById(eventID);
-    return {
-      ...event._doc,
-      _id: event.id,
-      date: new Date(event._doc.date).toISOString(),
-      creator: getUserFunc.bind(this, event.creator.toString()),
-    };
+    const event = await Loaders.eventLoader.load(eventID.toString());
+    return event;
   } catch (error) {
     console.log(error);
     throw error;
@@ -53,12 +61,12 @@ const getEventFunc = async (eventID) => {
 
 const getUserFunc = async (uID) => {
   try {
-    const user = await User.findById(uID);
+    const user = await Loaders.userLoader.load(uID.toString());
     return {
       ...user._doc,
       password: null,
       _id: user._doc._id,
-      createdEvents: getEventsFunc.bind(this, user.createdEvents),
+      createdEvents: () => Loaders.eventLoader.loadMany(user._doc.createdEvents),
     };
   } catch (error) {
     console.log(error);
@@ -72,4 +80,5 @@ module.exports = {
   getEventsFunc,
   getEventFunc,
   getUserFunc,
+  Loaders,
 };

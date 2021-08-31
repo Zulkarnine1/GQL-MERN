@@ -5,7 +5,7 @@ const { transformEvent } = require("./resolverHelper");
 module.exports = {
   events: async () => {
     try {
-      const events = await Event.find({});
+      const events = await Event.find();
       let ans = events.map((ev) => {
         return transformEvent(ev._doc);
       });
@@ -21,9 +21,9 @@ module.exports = {
       let event = args.event;
       event.price = Number(event.price);
       event.date = new Date(event.date).toISOString();
-      const newEvent = new Event({ ...event, creator: "612b3eea9905252f64ad43e1" });
+      const newEvent = new Event({ ...event, creator: req.userId });
       await newEvent.save();
-      const user = await User.findById("612b3eea9905252f64ad43e1");
+      const user = await User.findById(req.userId);
       if (!user) throw new Error("User with ID not found");
       user.createdEvents.push(newEvent);
       await user.save();

@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const GQLSchema = require("./graphql/schema/index");
 const GQLResolvers = require("./graphql/resolvers/index");
 const { authenCheck } = require("./middleware/auth-check");
+const { initiate } = require("./middleware/loaderInitializer");
 
 const app = express();
 
@@ -12,6 +13,7 @@ const EVENTS = [];
 
 app.use(express.json());
 app.use(authenCheck);
+app.use(initiate);
 app.use(
   "/graphql",
 

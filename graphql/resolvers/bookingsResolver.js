@@ -25,7 +25,7 @@ module.exports = {
       if (!event) throw new Error("Event with this ID doesn't exist.");
       const booking = new Booking({
         event: evID,
-        user: "612b3eea9905252f64ad43e1",
+        user: req.userId,
       });
       let result = await booking.save();
       const ans = transformBooking(result._doc);
